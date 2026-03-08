@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>02 · Imatges Docker | Curs Docker & K8s</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-docker">🟢 Mòdul 1 · Sessió 02</span>
+    <h1 class="page-title">Imatges Docker<br>Construcció i Gestió</h1>
+    <p class="page-subtitle">Passa de ser "usuari" de contenidors a "creador". Aprèn el sistema de capes, Docker Hub i com crear les teves pròpies imatges amb un Dockerfile.</p>
+  </div>
+  <main>
+    <div class="section-label">Conceptes clau</div>
+    <div class="card">
+      <h2>📦 Què és una imatge?</h2>
+      <p>Si un contenidor és l'execució (la instància), la imatge és la <strong>plantilla immutable</strong>.</p>
+      <div class="card-grid" style="margin-top:1rem;">
+        <div class="card" style="margin:0;">
+          <h3>🧅 Sistema de Capes</h3>
+          <p>Les imatges es construeixen com una ceba: cada instrucció del Dockerfile afegeix una capa nova. Això les fa molt eficients per emmagatzemar i distribuir.</p>
+        </div>
+        <div class="card" style="margin:0;">
+          <h3>📦 Tot inclòs</h3>
+          <p>Conté el sistema operatiu base, llibreries, codi i configuracions. Si funciona a la teva màquina, funcionarà a qualsevol lloc amb Docker instal·lat.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🌐 Docker Hub: El repositori global</h2>
+      <p>Docker Hub és el registre públic on trobem imatges oficials (Nginx, Python, Ubuntu, Node.js, MySQL, etc.).</p>
+      <pre><code># Descarregar una imatge (sense executar)
+docker pull ubuntu:22.04
+
+# Executar de forma interactiva
+docker run -it ubuntu:22.04 bash
+
+# Llistar imatges locals
+docker images
+
+# Buscar imatges al Hub
+docker search nginx</code></pre>
+    </div>
+
+    <div class="section-label">Crear imatges pròpies</div>
+    <div class="card">
+      <h2>📝 Sintaxi del Dockerfile</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Instrucció</th><th>Descripció</th><th>Exemple</th></tr></thead>
+          <tbody>
+            <tr><td><code>FROM</code></td><td>Imatge base (obligatòria, primera línia)</td><td><code>FROM ubuntu:24.04</code></td></tr>
+            <tr><td><code>RUN</code></td><td>Executa comandes durant la construcció</td><td><code>RUN apt-get update && apt-get install -y python3</code></td></tr>
+            <tr><td><code>COPY</code></td><td>Copia fitxers del host a la imatge</td><td><code>COPY script.py /app/</code></td></tr>
+            <tr><td><code>ADD</code></td><td>Com COPY però pot descomprimir i descarregar URLs</td><td><code>ADD fitxer.tar.gz /app/</code></td></tr>
+            <tr><td><code>WORKDIR</code></td><td>Estableix el directori de treball</td><td><code>WORKDIR /app</code></td></tr>
+            <tr><td><code>CMD</code></td><td>Comanda per defecte (sobreescribible)</td><td><code>CMD ["python3", "app.py"]</code></td></tr>
+            <tr><td><code>ENTRYPOINT</code></td><td>Comanda principal (no sobreescribible)</td><td><code>ENTRYPOINT ["python3"]</code></td></tr>
+            <tr><td><code>EXPOSE</code></td><td>Documenta el port que usa l'aplicació</td><td><code>EXPOSE 80</code></td></tr>
+            <tr><td><code>ENV</code></td><td>Variable d'entorn persistent</td><td><code>ENV PORT=3000</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🛠️ Taller pràctic: Primera imatge personalitzada</h2>
+      <p>Crearem una imatge basada en Ubuntu 24.04 que executa un script Python automàticament.</p>
+
+      <h3>Pas A: Preparar els fitxers</h3>
+      <p>Fitxer <code>script.py</code>:</p>
+      <pre><code>print("Hello, World! Sóc un contenidor personalitzat.")</code></pre>
+
+      <p>Fitxer <code>Dockerfile</code> (sense extensió):</p>
+      <pre><code># 1. Imatge base
+FROM ubuntu:24.04
+
+# 2. Instal·lem dependències
+RUN apt-get update && apt-get install -y python3
+
+# 3. Copiem el codi dins la imatge
+COPY script.py /app/
+
+# 4. Comanda que s'executa en arrencar
+CMD ["python3", "/app/script.py"]</code></pre>
+
+      <h3>Pas B: Construir la imatge</h3>
+      <pre><code># El punt (.) indica que el Dockerfile és al directori actual
+docker build -t la-meva-imatge:v1 .
+
+# Verificar que s'ha creat
+docker images
+
+# Executar-la
+docker run --rm la-meva-imatge:v1</code></pre>
+    </div>
+
+    <div class="section-label">Gestió d'imatges</div>
+    <div class="card">
+      <h2>🧹 Comandes de gestió</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Acció</th><th>Comanda</th><th>Detall</th></tr></thead>
+          <tbody>
+            <tr><td>Llistar</td><td><code>docker images</code></td><td>Mostra mida, ID i data de creació</td></tr>
+            <tr><td>Esborrar</td><td><code>docker rmi nom_imatge</code></td><td>Esborra la imatge del disc</td></tr>
+            <tr><td>Forçar</td><td><code>docker rmi -f nom_imatge</code></td><td>Necessari si un contenidor (aturat) encara la fa servir</td></tr>
+            <tr><td>Netejar no usades</td><td><code>docker image prune</code></td><td>Esborra imatges sense etiqueta ("dangling")</td></tr>
+            <tr><td>Netejar tot</td><td><code>docker image prune -a</code></td><td>Esborra totes les imatges no usades per cap contenidor</td></tr>
+            <tr><td>Inspeccionar</td><td><code>docker inspect nom_imatge</code></td><td>Detalls complets en JSON</td></tr>
+            <tr><td>Historial de capes</td><td><code>docker history nom_imatge</code></td><td>Veure cada capa i la seva mida</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>📸 Entrega de la sessió</h2>
+      <p>Puja una captura de pantalla de la teva terminal mostrant:</p>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <h4>La construcció de la imatge</h4>
+            <pre><code>docker build -t la-meva-imatge:v1 .</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <h4>L'execució correcta amb el missatge</h4>
+            <pre><code>docker run la-meva-imatge:v1</code></pre>
+            <p>Ha de mostrar: <code>Hello, World! Sóc un contenidor personalitzat.</code></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box success">
+      <div class="box-title">✅ Resultat esperat</div>
+      <p style="margin:0;">Entendre com reutilitzar programari existent sense instal·lar res al host i saber convertir codi font en una imatge portable.</p>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '02-imatges.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

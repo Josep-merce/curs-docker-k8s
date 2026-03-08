@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18 · Projecte Final K8s | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-k8s">🔴 Mòdul 3 · Sessió 18</span>
+    <h1 class="page-title">Projecte Final K8s<br>Arquitectura Cloud-Native</h1>
+    <p class="page-subtitle">Ha arribat el moment de la veritat. Uneix totes les habilitats en un únic projecte real: WordPress + MariaDB amb secrets, persistència, networking i Ingress.</p>
+  </div>
+  <main>
+    <div class="section-label">Arquitectura de l'aplicació</div>
+    <div class="card">
+      <h2>🏗️ Components necessaris</h2>
+      <div class="card-grid">
+        <div class="card" style="margin:0;"><h3>🔐 Secret</h3><p>Per protegir les contrasenyes de la base de dades.</p></div>
+        <div class="card" style="margin:0;"><h3>💾 2× PVC</h3><p>Un per a MariaDB i un per a WordPress (fitxers i fotos).</p></div>
+        <div class="card" style="margin:0;"><h3>🖥️ 2× Deployment</h3><p>Un per a MariaDB i un per a WordPress.</p></div>
+        <div class="card" style="margin:0;"><h3>🔗 2× Service ClusterIP</h3><p>Per a la comunicació interna entre Pods.</p></div>
+        <div class="card" style="margin:0;"><h3>🌐 Ingress</h3><p>Per accedir al blog amb un domini net.</p></div>
+      </div>
+    </div>
+
+    <div class="section-label">Pla d'acció</div>
+    <div class="card">
+      <h2>📋 Fase 1: Fonaments (secret.yaml + pvcs.yaml)</h2>
+      <pre><code># secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wordpress-secret
+type: Opaque
+data:
+  # echo -n "rootpassword" | base64
+  MYSQL_ROOT_PASSWORD: cm9vdHBhc3N3b3Jk
+  MYSQL_PASSWORD: d3BwYXNzd29yZA==
+
+---
+# pvcs.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-pvc
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wordpress-pvc
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 2Gi</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>📋 Fase 2: Backend (mariadb.yaml)</h2>
+      <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:10.11
+        env:
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: MARIADB_DATABASE
+          value: wordpress
+        - name: MARIADB_USER
+          value: wpuser
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress-secret
+              key: MYSQL_PASSWORD
+        volumeMounts:
+        - name: mariadb-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mariadb-storage
+        persistentVolumeClaim:
+          claimName: mariadb-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: servei-mariadb
+spec:
+  type: ClusterIP
+  selector:
+    app: mariadb
+  ports:
+  - port: 3306
+    targetPort: 3306</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>📋 Fase 3: Frontend (wordpress.yaml)</h2>
+      <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      containers:
+      - name: wordpress
+        image: wordpress:latest
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: servei-mariadb:3306
+        - name: WORDPRESS_DB_USER
+          value: wpuser
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wordpress-secret
+              key: MYSQL_PASSWORD
+        - name: WORDPRESS_DB_NAME
+          value: wordpress
+        volumeMounts:
+        - name: wordpress-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: wordpress-storage
+        persistentVolumeClaim:
+          claimName: wordpress-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: servei-wordpress
+spec:
+  type: ClusterIP
+  selector:
+    app: wordpress
+  ports:
+  - port: 80
+    targetPort: 80</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>📋 Fase 4: Porta d'entrada (ingress.yaml)</h2>
+      <pre><code>apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wordpress-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: elmeublog.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: servei-wordpress
+            port:
+              number: 80</code></pre>
+      <pre><code># Afegir al /etc/hosts:
+192.168.33.11 elmeublog.local</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>🚀 Desplegar tot</h2>
+      <pre><code>sudo kubectl apply -f secret.yaml
+sudo kubectl apply -f pvcs.yaml
+sudo kubectl apply -f mariadb.yaml
+sudo kubectl apply -f wordpress.yaml
+sudo kubectl apply -f ingress.yaml
+
+# Verificar tot
+sudo kubectl get all,ingress,pvc,secret</code></pre>
+      <div class="highlight-box success">
+        <div class="box-title">🏆 Enhorabona!</div>
+        <p style="margin:0;">Si veus la pantalla d'instal·lació de WordPress a <code>http://elmeublog.local</code>, has completat el curs amb èxit! Has desplegat una arquitectura Cloud-Native completa seguint les millors pràctiques de la indústria.</p>
+      </div>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '18-projecte-final.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 · Introducció a Kubernetes | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-k8s">🔴 Mòdul 3 · Sessió 10</span>
+    <h1 class="page-title">Introducció a Kubernetes<br>K8s i Pods</h1>
+    <p class="page-subtitle">Kubernetes és el director d'orquestra dels contenidors. Aprèn l'arquitectura bàsica, instal·la k3s i llança el teu primer Pod.</p>
+  </div>
+  <main>
+    <div class="section-label">Kubernetes vs k3s</div>
+    <div class="card">
+      <h2>☸️ Per què k3s per al curs?</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Característica</th><th>Kubernetes (K8s clàssic)</th><th>k3s (El nostre entorn)</th></tr></thead>
+        <tbody>
+          <tr><td>Pes i Recursos</td><td>Alt (molta memòria i CPU)</td><td>Molt lleuger (&lt;100MB de binari)</td></tr>
+          <tr><td>Instal·lació</td><td>Complexa, múltiples components</td><td>Simple, un sol fitxer executable</td></tr>
+          <tr><td>Cas d'ús ideal</td><td>Grans centres de dades i producció</td><td>Aprenentatge, Edge computing, proves locals</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="section-label">Arquitectura bàsica</div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>🧠 Control Plane (Cervell)</h3>
+        <p>El node mestre. Pren les decisions globals: on col·locar una nova aplicació, com reaccionar si una màquina s'espatlla.</p>
+        <ul>
+          <li>Gestiona l'API (porta d'entrada per a les peticions)</li>
+          <li>Emmagatzema l'estat global del sistema</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>💪 Worker Nodes (Músculs)</h3>
+        <p>Les màquines que realment executen les aplicacions (contenidors).</p>
+        <ul>
+          <li>Reben instruccions del Control Plane</li>
+          <li>Informen constantment del seu estat</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-label">Posada en marxa amb Vagrant + k3s</div>
+    <div class="card">
+      <h2>💻 Arrencar el clúster</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Clonar el repositori</h4><pre><code>git clone https://git.agile611.com/Agile611/startusingkubernetes.git
+cd startusingkubernetes</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Aixecar la infraestructura</h4><pre><code>vagrant up
+# Pot trigar uns minuts la primera vegada. Paciència!</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Accedir a la màquina principal</h4><pre><code>vagrant ssh server</code></pre></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">kubectl — El comandament a distància</div>
+    <div class="card">
+      <h2>🎮 Primeres comandes</h2>
+      <pre><code># Comprovar els nodes del clúster
+sudo kubectl get nodes
+
+# Informació del clúster
+sudo kubectl cluster-info
+
+# Llistar tots els Pods
+sudo kubectl get pods
+
+# Llistar tots els Pods de tots els namespaces
+sudo kubectl get pods -A</code></pre>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🏋️ Desplegament amb K3s</h2>
+      <p>Crea un fitxer <code>activitat9.yaml</code> amb un Pod Apache i desplega'l:</p>
+      <pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-apache-k3s
+spec:
+  containers:
+  - name: apache
+    image: httpd:alpine
+    ports:
+    - containerPort: 80</code></pre>
+      <pre><code>sudo kubectl apply -f activitat9.yaml
+sudo kubectl get pods</code></pre>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '10-kubernetes-pods.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

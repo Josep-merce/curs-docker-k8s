@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>03 · Apps Reals i Optimització | Curs Docker & K8s</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-docker">🟢 Mòdul 1 · Sessió 03</span>
+    <h1 class="page-title">Construcció d'Apps Reals<br>i Optimització d'Imatges</h1>
+    <p class="page-subtitle">Desplega una aplicació Node.js real, redueix dràsticament la mida de les imatges i analitza les capes amb Dive com un veritable enginyer DevOps.</p>
+  </div>
+  <main>
+    <div class="section-label">Cas pràctic: App Node.js</div>
+    <div class="card">
+      <h2>🌍 Desplegament d'una App Node.js real</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <h4>Clonar el codi font</h4>
+            <pre><code>git clone https://git.agile611.com/Agile611/the-example-app-nodejs.git
+cd the-example-app-nodejs/</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <h4>Construir la imatge</h4>
+            <pre><code>docker build -t the-example-app.nodejs .</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div class="step-content">
+            <h4>Executar el contenidor</h4>
+            <pre><code>docker run -d -p 3000:3000 --name my-node-app the-example-app.nodejs</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Optimització: El concepte de "Runtime"</div>
+    <div class="card">
+      <h2>⚡ Imatge Base Correcta</h2>
+      <p>No facis servir sempre <code>ubuntu</code> com a base. És pesat i insegur per a producció.</p>
+
+      <div class="card-grid">
+        <div class="card" style="margin:0; border-color: rgba(244,63,142,0.3);">
+          <h3>❌ Manera incorrecta (Pesada)</h3>
+          <pre><code>FROM ubuntu:24.04
+RUN apt-get update && apt-get install -y python3
+COPY script.py /app/
+CMD ["python3", "/app/script.py"]</code></pre>
+          <p style="color:var(--pink); font-weight:600; margin:0;">~800 MB</p>
+        </div>
+        <div class="card" style="margin:0; border-color: rgba(16,217,138,0.3);">
+          <h3>✅ Manera correcta (Runtime slim)</h3>
+          <pre><code>FROM python:3.12-slim
+WORKDIR /app
+COPY script.py .
+CMD ["python", "script.py"]</code></pre>
+          <p style="color:var(--green); font-weight:600; margin:0;">~150 MB · 5× més petita</p>
+        </div>
+      </div>
+
+      <div class="highlight-box success" style="margin-top:1.5rem;">
+        <div class="box-title">✅ Avantatges de les imatges slim/alpine</div>
+        <ul style="margin:0; color:var(--text);">
+          <li><strong>Mida:</strong> Passem de ~800MB a ~150MB (o ~50MB amb alpine)</li>
+          <li><strong>Seguretat:</strong> Menys paquets innecessaris = menys vulnerabilitats</li>
+          <li><strong>Velocitat:</strong> Es descarrega i construeix més ràpid</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-label">CMD vs ENTRYPOINT</div>
+    <div class="card">
+      <h2>🧠 Diferència clau</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Instrucció</th><th>Comportament</th><th>Es pot sobreescriure?</th></tr></thead>
+          <tbody>
+            <tr><td><code>CMD</code></td><td>Defineix la comanda per defecte</td><td>SÍ (fàcilment amb <code>docker run ... nova-comanda</code>)</td></tr>
+            <tr><td><code>ENTRYPOINT</code></td><td>Defineix la comanda principal/fixa</td><td>NO (els arguments s'afegeixen al final)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre><code># Amb CMD ["echo", "Hola"]
+docker run la-imatge Adéu   # Imprimeix: "Adéu" (substitueix)
+
+# Amb ENTRYPOINT ["echo"]
+docker run la-imatge Hola   # Imprimeix: "Hola" (concatena)</code></pre>
+    </div>
+
+    <div class="section-label">Eina: Dive</div>
+    <div class="card">
+      <h2>🔍 Anàlisi de capes amb Dive</h2>
+      <p>Dive ens permet inspeccionar les capes d'una imatge i detectar espai malgastat.</p>
+      <pre><code># Instal·lació (Mac)
+brew install dive
+
+# Analitzar una imatge
+dive node:alpine
+dive python:3.12</code></pre>
+
+      <h3>Què buscar a Dive?</h3>
+      <ul>
+        <li><strong>Efficiency Score:</strong> Com més alt, millor.</li>
+        <li><strong>Wasted Space:</strong> Fitxers esborrats en capes posteriors però que ocupen espai a l'historial.</li>
+        <li><strong>Layer Details:</strong> Quina comanda ha afegit més megabytes?</li>
+      </ul>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🛠️ El Repte de l'Optimització</h2>
+      <p>Actua com a enginyer DevOps: optimitza una imatge "fat" a "slim".</p>
+
+      <h3>Part 1: La imatge "fat"</h3>
+      <p>Crea <code>app.py</code>:</p>
+      <pre><code>import sys
+print(f"Hola! Estic executant-me amb els arguments: {sys.argv[1:]}")</code></pre>
+      <p>Crea <code>Dockerfile.fat</code>:</p>
+      <pre><code>FROM ubuntu:24.04
+RUN apt-get update && apt-get install -y python3
+WORKDIR /app
+COPY app.py .
+CMD ["python3", "app.py", "versio-fat"]</code></pre>
+      <pre><code>docker build -f Dockerfile.fat -t repte-python:fat .</code></pre>
+
+      <h3>Part 2: La imatge "slim"</h3>
+      <p>Crea <code>Dockerfile.slim</code> amb imatge base oficial de Python, <code>ENTRYPOINT</code> en lloc de <code>CMD</code>:</p>
+      <pre><code>FROM python:3.12-slim
+WORKDIR /app
+COPY app.py .
+ENTRYPOINT ["python", "app.py"]</code></pre>
+      <pre><code>docker build -f Dockerfile.slim -t repte-python:slim .</code></pre>
+
+      <h3>Part 3: Comparació</h3>
+      <pre><code># Comparar mides
+docker images | grep repte-python
+
+# Provar ENTRYPOINT amb argument
+docker run --rm repte-python:slim Sóc-Un-DevOps-Expert
+
+# Analitzar amb Dive
+dive repte-python:fat</code></pre>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '03-apps-optimitzacio.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

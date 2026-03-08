@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 · Services | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-k8s">🔴 Mòdul 3 · Sessió 13</span>
+    <h1 class="page-title">Services<br>Exposant l'aplicació</h1>
+    <p class="page-subtitle">Les IPs dels Pods canvien constantment. Els Services proporcionen una adreça fixa i estable que actua com a recepcionista i balancejador de càrrega.</p>
+  </div>
+  <main>
+    <div class="section-label">El problema de les IPs dinàmiques</div>
+    <div class="card">
+      <h2>🔀 Per què necessitem Services?</h2>
+      <p>Cada vegada que Kubernetes crea un Pod, li assigna una IP interna. Però els Pods són efímers: si un mor i neix un de nou, tindrà una IP completament diferent.</p>
+      <p>Un <strong>Service</strong> és una adreça fixa i estable que actua com a "recepcionista" i reparteix el trànsit entre els Pods vius en cada moment.</p>
+    </div>
+
+    <div class="section-label">Tipus de Services</div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>🔒 ClusterIP (per defecte)</h3>
+        <p>IP virtual accessible <strong>només des de dins</strong> del clúster.</p>
+        <p><strong>Cas d'ús:</strong> Connectar WordPress (frontend) amb MariaDB (backend). La DB no ha de ser accessible des d'internet.</p>
+      </div>
+      <div class="card">
+        <h3>🌐 NodePort</h3>
+        <p>Obre un port (30000–32767) als nodes físics. Trànsit des de la xarxa local.</p>
+        <p><strong>Cas d'ús:</strong> Accedir a l'app des de la xarxa local o durant el desenvolupament.</p>
+      </div>
+      <div class="card">
+        <h3>☁️ LoadBalancer</h3>
+        <p>Demana automàticament una IP pública al proveïdor Cloud (AWS, GCP, Azure).</p>
+        <p><strong>Cas d'ús:</strong> Exposar l'aplicació als usuaris d'arreu del món.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Labels i Selectors</div>
+    <div class="card">
+      <h2>🧲 La màgia de la connexió</h2>
+      <p>Kubernetes no usa IPs ni noms per connectar Services amb Pods. Usa un sistema d'etiquetes:</p>
+      <ul>
+        <li><strong>Labels:</strong> Parells clau-valor als Pods (ex: <code>app: nginx</code>)</li>
+        <li><strong>Selectors:</strong> Regla al Service: "Envia trànsit als Pods amb <code>app: nginx</code>"</li>
+      </ul>
+      <p>Si un Pod mor i neix un nou amb la mateixa etiqueta, el Service el detecta automàticament.</p>
+    </div>
+
+    <div class="section-label">Pràctica: Exposa Nginx</div>
+    <div class="card">
+      <h2>🛠️ NodePort per accedir des del navegador</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Crear el Deployment</h4><pre><code>sudo kubectl create deployment el-meu-web --image=nginx</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Crear nginx-service.yaml</h4><pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: servei-web-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: el-meu-web
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Aplicar i comprovar</h4><pre><code>sudo kubectl apply -f nginx-service.yaml
+sudo kubectl get services</code></pre></div></div>
+        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Accedir des del navegador</h4><p>Obre: <code>http://192.168.33.10:30080</code></p><p>Si veus "Welcome to nginx!" — ho has aconseguit!</p></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Taula resum de Services</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tipus</th><th>Accessibilitat</th><th>Cas d'ús</th></tr></thead>
+        <tbody>
+          <tr><td>ClusterIP</td><td>Només interna</td><td>Comunicació entre microserveis (Web → DB)</td></tr>
+          <tr><td>NodePort</td><td>Interna + Xarxa Local</td><td>Desenvolupament, proves, accés directe</td></tr>
+          <tr><td>LoadBalancer</td><td>Externa (Internet)</td><td>Producció en entorns Cloud (AWS, GCP, Azure)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '13-services.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

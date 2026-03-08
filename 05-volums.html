@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>05 · Volums | Curs Docker & K8s</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-docker">🟢 Mòdul 1 · Sessió 05</span>
+    <h1 class="page-title">Volums<br>Persistència de Dades</h1>
+    <p class="page-subtitle">Els contenidors són efímers per defecte. Aprèn a usar Volumes, Bind Mounts i tmpfs per garantir que les teves dades sobrevisquin.</p>
+  </div>
+  <main>
+    <div class="section-label">El problema de l'efimeritat</div>
+    <div class="card">
+      <h2>🏨 L'analogia de l'hotel</h2>
+      <p>Un contenidor és com una habitació d'hotel:</p>
+      <ul>
+        <li>Pots portar les teves coses i moure mobles mentre hi ets.</li>
+        <li>Quan fas el "check-out" (elimines el contenidor), l'habitació es neteja completament per al següent hoste.</li>
+      </ul>
+      <p>Per guardar dades de manera permanent (com una base de dades o logs), necessitem un mecanisme extern: els <strong>Volums</strong>.</p>
+    </div>
+
+    <div class="section-label">Tipus de muntatges</div>
+    <div class="card">
+      <h2>🗂️ Taula comparativa</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tipus</th><th>On viuen les dades?</th><th>Qui ho gestiona?</th><th>Cas d'ús principal</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Volume</strong></td><td>Àrea reservada de Docker (<code>/var/lib/docker/volumes/</code>)</td><td>Docker</td><td>Producció, Bases de Dades</td></tr>
+            <tr><td><strong>Bind Mount</strong></td><td>Qualsevol ruta del Host</td><td>Usuari / OS</td><td>Desenvolupament, Configs</td></tr>
+            <tr><td><strong>tmpfs</strong></td><td>Memòria RAM</td><td>Sistema Operatiu</td><td>Seguretat, Cache ràpida</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🔧 Volumes gestionats per Docker</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Crear i inspeccionar</h4><pre><code>docker volume create les_meves_dades
+docker volume ls
+docker volume inspect les_meves_dades</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Connectar a un contenidor</h4><pre><code>docker run -d --name contenidor_1 -v les_meves_dades:/data alpine tail -f /dev/null
+docker exec contenidor_1 sh -c "echo 'Hola des del contenidor 1!' > /data/missatge.txt"
+docker exec contenidor_1 cat /data/missatge.txt</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Prova de foc: esborra el contenidor i recrea'l</h4><pre><code>docker rm -f contenidor_1
+docker run -d --name contenidor_2 -v les_meves_dades:/data alpine tail -f /dev/null
+docker exec contenidor_2 cat /data/missatge.txt
+# Hauries de veure: "Hola des del contenidor 1!"</code></pre></div></div>
+        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Neteja</h4><pre><code>docker rm -f contenidor_2
+docker volume rm les_meves_dades</code></pre></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📁 Bind Mounts — Edició en viu</h2>
+      <p>Perfecte per al desenvolupament: edita al teu ordinador i els canvis es reflecteixen al contenidor a l'instant.</p>
+      <pre><code># Muntar el directori actual a Nginx
+docker run -d \
+  --name dev-web \
+  -v $(pwd)/web_project:/usr/share/nginx/html \
+  -p 8080:80 \
+  nginx</code></pre>
+      <div class="highlight-box tip">
+        <div class="box-title">💡 Consell</div>
+        <p style="margin:0;">Usa sempre rutes absolutes o <code>$(pwd)</code> per als bind mounts. Les rutes relatives no funcionen amb Docker.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Bones pràctiques</div>
+    <div class="card">
+      <h2>✅ Consells d'expert</h2>
+      <ul>
+        <li><strong>Noms explícits:</strong> Usa noms descriptius (ex: <code>postgres_data</code>, <code>web_logs</code>). Si no, Docker genera hashes aleatoris impossibles de recordar.</li>
+        <li><strong>Còpies de seguretat:</strong> Els volums són persistents però no indestructibles. Fes backups del directori <code>/var/lib/docker/volumes</code>.</li>
+        <li><strong>Drivers:</strong> Docker permet drivers per guardar dades al núvol (AWS S3, Azure) o en xarxa (NFS).</li>
+      </ul>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🚀 "Salvem les dades!" — Missió DevOps</h2>
+      <p><strong>Exercici 1:</strong> Crea el volum <code>dades_clients</code>, guarda el teu nom en un fitxer, esborra el contenidor, crea'n un de nou i comprova que el fitxer persisteix.</p>
+      <p><strong>Exercici 2:</strong> Crea una carpeta <code>web_project</code> amb un <code>index.html</code>, munta-la a Nginx amb bind mount, i modifica el fitxer en viu sense aturar el contenidor.</p>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '05-volums.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

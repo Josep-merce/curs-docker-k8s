@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>01 · Fonaments de Docker | Curs Docker & K8s</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+
+  <div class="page-header">
+    <span class="module-badge badge-docker">🟢 Mòdul 1 · Sessió 01</span>
+    <h1 class="page-title">Fonaments de Docker<br>Creació i Gestió de Contenidors</h1>
+    <p class="page-subtitle">Aprèn a interactuar directament amb el Docker Engine, dominant el cicle de vida essencial d'un contenidor: des del seu naixement fins a la seva aturada segura.</p>
+  </div>
+
+  <main>
+    <div class="section-label">Objectius d'aprenentatge</div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>🚀 Desplegament de Contenidors</h3>
+        <ul>
+          <li>Iniciar contenidors amb un sol comandament</li>
+          <li>Diferència entre execució en primer pla i <strong>detached mode</strong> (<code>-d</code>)</li>
+          <li>Mapeig de ports (<code>-p</code>), noms personalitzats (<code>--name</code>) i neteja automàtica (<code>--rm</code>)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>👁️ Monitorització i Visibilitat</h3>
+        <ul>
+          <li>Llistar contenidors actius i inactius (<code>docker ps</code>)</li>
+          <li>Ús de filtres avançats</li>
+          <li>Interpretació de l'estat (<code>Up</code>, <code>Exited</code>) i els IDs</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>⚙️ Gestió del Cicle de Vida</h3>
+        <ul>
+          <li>Aturada segura amb <strong>Graceful Shutdown</strong></li>
+          <li>Diferència entre <code>SIGTERM</code> (stop) i <code>SIGKILL</code> (kill)</li>
+          <li>Gestió de temps d'espera</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-label">Comandes essencials</div>
+    <div class="card">
+      <h2>docker run</h2>
+      <p>Crea i inicia un contenidor nou des d'una imatge. És la comanda central de Docker.</p>
+
+      <h3>Sintaxi bàsica</h3>
+      <pre><code>docker run [opcions] IMATGE [comanda]</code></pre>
+
+      <h3>Opcions principals</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Opció</th><th>Descripció</th><th>Exemple</th></tr></thead>
+          <tbody>
+            <tr><td><code>-d</code></td><td>Mode desacoblat (segon pla)</td><td><code>docker run -d nginx</code></td></tr>
+            <tr><td><code>-p HOST:CONT</code></td><td>Mapeja ports</td><td><code>docker run -p 8080:80 nginx</code></td></tr>
+            <tr><td><code>--name NOM</code></td><td>Assigna un nom</td><td><code>docker run --name web nginx</code></td></tr>
+            <tr><td><code>--rm</code></td><td>Esborra en aturar-se</td><td><code>docker run --rm ubuntu echo "hola"</code></td></tr>
+            <tr><td><code>-it</code></td><td>Terminal interactiu</td><td><code>docker run -it ubuntu bash</code></td></tr>
+            <tr><td><code>-e VAR=VALOR</code></td><td>Variable d'entorn</td><td><code>docker run -e MYSQL_ROOT_PASSWORD=secret mysql</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Exemples pràctics</h3>
+      <pre><code># Hello World efímer
+docker run --rm hello-world
+
+# Nginx accessible al port 80 del host
+docker run -d --name servidor-web -p 80:80 nginx
+
+# Terminal interactiu a Ubuntu
+docker run -it --rm ubuntu bash</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>docker ps — Llistar contenidors</h2>
+      <pre><code># Contenidors actius
+docker ps
+
+# Tots (incloent aturats)
+docker ps -a
+
+# Filtrar per nom
+docker ps --filter "name=web"
+
+# Format personalitzat
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"</code></pre>
+
+      <p>La sortida mostra: <strong>CONTAINER ID</strong>, <strong>IMAGE</strong>, <strong>COMMAND</strong>, <strong>CREATED</strong>, <strong>STATUS</strong>, <strong>PORTS</strong>, <strong>NAMES</strong>.</p>
+    </div>
+
+    <div class="card">
+      <h2>Gestió del cicle de vida</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Comanda</th><th>Senyal</th><th>Comportament</th><th>Quan usar-la</th></tr></thead>
+          <tbody>
+            <tr><td><code>docker stop</code></td><td>SIGTERM → SIGKILL (10s)</td><td>Aturada <strong>elegant</strong>: l'aplicació pot netejar recursos</td><td>Sempre que sigui possible</td></tr>
+            <tr><td><code>docker kill</code></td><td>SIGKILL (immediat)</td><td>Aturada <strong>forçada</strong>: el procés mor immediatament</td><td>Quan stop no respon</td></tr>
+            <tr><td><code>docker rm</code></td><td>—</td><td>Esborra el contenidor aturat</td><td>Neteja</td></tr>
+            <tr><td><code>docker rm -f</code></td><td>—</td><td>Atura i esborra</td><td>Neteja ràpida</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code># Aturar de manera elegant
+docker stop servidor-web
+
+# Aturar amb temps d'espera personalitzat (30 seg)
+docker stop -t 30 servidor-web
+
+# Forçar l'aturada
+docker kill servidor-web
+
+# Esborrar contenidor aturat
+docker rm servidor-web
+
+# Esborrar tots els contenidors aturats
+docker container prune</code></pre>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🛠️ Exercici de la sessió</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <h4>Hello World efímer</h4>
+            <p>Executa el contenidor clàssic i observa la sortida.</p>
+            <pre><code>docker run --rm hello-world</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <h4>Servidor web Nginx</h4>
+            <p>Desplega un Nginx accessible des del navegador a <code>localhost:80</code>.</p>
+            <pre><code>docker run -d --name servidor-web -p 80:80 nginx</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div class="step-content">
+            <h4>Neteja</h4>
+            <p>Atura i elimina tots els contenidors que has creat.</p>
+            <pre><code>docker stop servidor-web
+docker rm servidor-web</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box info">
+      <div class="box-title">💡 Consell</div>
+      <p style="margin:0;">Fes servir sempre <code>--name</code> per posar noms descriptius als contenidors. Serà molt més fàcil identificar-los amb <code>docker ps</code> que recordar els IDs hexadecimals.</p>
+    </div>
+  </main>
+
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '01-fonaments-docker.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

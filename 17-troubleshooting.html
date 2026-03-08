@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>17 · Troubleshooting | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-k8s">🔴 Mòdul 3 · Sessió 17</span>
+    <h1 class="page-title">Troubleshooting<br>Resolució de Problemes</h1>
+    <p class="page-subtitle">Les coses fallen. Saber diagnosticar i arreglar errors és el que separa un principiant d'un veritable expert. Converteix-te en un detectiu del clúster.</p>
+  </div>
+  <main>
+    <div class="section-label">Estats d'error més comuns</div>
+    <div class="card-grid">
+      <div class="card" style="border-color:rgba(251,191,36,0.4);">
+        <h3>⏳ Pending</h3>
+        <p>El Pod ha estat acceptat però no s'ha pogut assignar a cap node.</p>
+        <p><strong>Causa típica:</strong> Falta de recursos (CPU/RAM) o PVC que no es pot satisfer.</p>
+      </div>
+      <div class="card" style="border-color:rgba(255,124,42,0.4);">
+        <h3>🖼️ ImagePullBackOff</h3>
+        <p>El clúster ha intentat descarregar la imatge però ha fracassat.</p>
+        <p><strong>Causa típica:</strong> Nom de la imatge incorrecte, etiqueta inexistent, o repositori privat sense credencials.</p>
+      </div>
+      <div class="card" style="border-color:rgba(244,63,142,0.4);">
+        <h3>🔁 CrashLoopBackOff</h3>
+        <p>El contenidor arrenca però mor immediatament. Kubernetes ho reintenta en bucle.</p>
+        <p><strong>Causa típica:</strong> Error de codi, variable d'entorn obligatòria faltant, comanda d'inici incorrecta.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Les eines del detectiu</div>
+    <div class="card">
+      <h2>🔍 Procés de diagnòstic</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Comanda</th><th>Què fa?</th><th>Quan usar-la?</th></tr></thead>
+        <tbody>
+          <tr><td><code>kubectl get pods</code></td><td>Estat general de tots els Pods</td><td>Primer cop d'ull per detectar qui falla</td></tr>
+          <tr><td><code>kubectl describe pod &lt;nom&gt;</code></td><td>Radiografia completa + Events del Pod</td><td>Quan tens Pending o ImagePullBackOff</td></tr>
+          <tr><td><code>kubectl logs &lt;nom&gt;</code></td><td>Sortida de l'aplicació (stdout)</td><td>Quan tens CrashLoopBackOff o errors de codi</td></tr>
+          <tr><td><code>kubectl get events</code></td><td>Registre de tots els avisos i errors del clúster</td><td>Problemes globals o de xarxa</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <h2>🛠️ Comandes detallades</h2>
+      <pre><code># Veure tots els pods (incloent els que fallen)
+kubectl get pods -A
+
+# Radiografia completa d'un Pod
+kubectl describe pod nom-del-pod
+
+# Llegir logs
+kubectl logs nom-del-pod
+kubectl logs -f nom-del-pod  # En temps real
+kubectl logs nom-del-pod --previous  # De la instància anterior (si ha mort)
+
+# Events ordenats per temps
+kubectl get events --sort-by='.metadata.creationTimestamp'
+
+# Editar un recurs en viu
+kubectl edit deployment nom-del-deployment</code></pre>
+    </div>
+
+    <div class="section-label">Pràctica: Escape Room de Kubernetes</div>
+    <div class="card">
+      <h2>🎮 Metodologia de diagnòstic</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Investigar</h4><pre><code>kubectl get pods
+# Identifica quins recursos estan fallant i quin és el seu estat</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Diagnosticar</h4><pre><code>kubectl describe pod nom-del-pod
+kubectl logs nom-del-pod
+# Llegeix els Events i els missatges d'error</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Reparar</h4><pre><code>kubectl edit deployment nom-del-deployment
+# Corregeix l'error tipogràfic, afegeix la variable faltant, etc.</code></pre></div></div>
+        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Verificar</h4><pre><code>kubectl get pods
+# El Pod ha de passar a l'estat Running i mantenir-s'hi</code></pre></div></div>
+      </div>
+    </div>
+
+    <div class="highlight-box success">
+      <div class="box-title">💡 Consell d'expert</div>
+      <p style="margin:0;">Respireu fons quan les coses fallen! Kubernetes és un sistema increïblement xerraire si sabem on escoltar. El procés lògic és: <strong>observar → events → describe → logs</strong>. No esborreu res fins a entendre el problema.</p>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '17-troubleshooting.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>
