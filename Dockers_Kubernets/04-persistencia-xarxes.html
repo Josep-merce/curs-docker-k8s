@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>04 · Persistència i Xarxes | Curs Docker & K8s</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-docker">🟢 Mòdul 1 · Sessió 04</span>
+    <h1 class="page-title">Gestió Avançada<br>Persistència i Xarxes</h1>
+    <p class="page-subtitle">docker run vs docker exec, logs, volums per persistir dades, i exposició de ports. Desplegament real de WordPress amb MySQL persistent.</p>
+  </div>
+  <main>
+    <div class="section-label">docker run vs docker exec</div>
+    <div class="card">
+      <h2>La gran confusió resolta</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Comanda</th><th>Què fa?</th><th>Analogia</th></tr></thead>
+          <tbody>
+            <tr><td><code>docker run</code></td><td>Crea un NOU contenidor des de zero</td><td>Construeix una casa nova i hi entra</td></tr>
+            <tr><td><code>docker exec</code></td><td>Entra en un contenidor JA EXISTENT (en marxa)</td><td>Entra a una habitació d'una casa ja construïda</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre><code># Creem un contenidor
+docker run -d --name el-meu-web nginx
+
+# Entrem dins per modificar fitxers o depurar
+docker exec -it el-meu-web bash
+
+# Nota: si la imatge és molt bàsica (Alpine), usa sh
+docker exec -it contenidor-alpine sh</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>📋 docker logs — Veure la sortida</h2>
+      <pre><code># Veure logs
+docker logs el-meu-web
+
+# Seguir logs en temps real (com tail -f)
+docker logs -f el-meu-web
+
+# Últimes 50 línies
+docker logs --tail 50 el-meu-web
+
+# Amb timestamps
+docker logs -t el-meu-web</code></pre>
+    </div>
+
+    <div class="section-label">Persistència de dades (Volums)</div>
+    <div class="card">
+      <h2>💾 Exemple pràctic: WordPress + MySQL</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <h4>Crear els volums</h4>
+            <pre><code>docker volume create wordpress_data
+docker volume create mysql_data</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <h4>Base de Dades (MySQL)</h4>
+            <pre><code>docker run -d \
+  --name wordpress_db \
+  -e MYSQL_ROOT_PASSWORD=rootpassword \
+  -e MYSQL_DATABASE=wordpress \
+  -e MYSQL_USER=wordpressuser \
+  -e MYSQL_PASSWORD=wordpresspassword \
+  -v mysql_data:/var/lib/mysql \
+  mysql:5.7</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div class="step-content">
+            <h4>Aplicació (WordPress)</h4>
+            <pre><code>docker run -d \
+  --name wordpress \
+  --link wordpress_db:mysql \
+  -e WORDPRESS_DB_HOST=wordpress_db:3306 \
+  -e WORDPRESS_DB_USER=wordpressuser \
+  -e WORDPRESS_DB_PASSWORD=wordpresspassword \
+  -e WORDPRESS_DB_NAME=wordpress \
+  -v wordpress_data:/var/www/html \
+  -p 8080:80 \
+  wordpress:latest</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="highlight-box success">
+        <div class="box-title">✅ Resultat</div>
+        <p style="margin:0;">Accedeix a <code>http://localhost:8080</code>. Encara que esborris els contenidors, la web seguirà allà quan els tornis a aixecar gràcies als volums.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Networking i Ports</div>
+    <div class="card">
+      <h2>🔌 Exposició de Ports (-p)</h2>
+      <p>La sintaxi és sempre: <code>-p HOST:CONTENIDOR</code></p>
+      <pre><code># Bàsic
+docker run -d -p 8080:80 nginx
+
+# Múltiples ports
+docker run -d -p 8080:80 -p 8443:443 httpd:latest
+
+# Restringir a una IP específica
+docker run -d --publish 192.168.1.100:8080:80 httpd:latest</code></pre>
+
+      <h3>Xarxes personalitzades (Bridge)</h3>
+      <pre><code># Crear la xarxa
+docker network create la-meva-xarxa
+
+# Llançar el servidor a la xarxa
+docker run -d --name servidor-web --network la-meva-xarxa httpd:latest
+
+# Llançar un client per comprovar la connexió
+docker run -it --network la-meva-xarxa alpine sh
+
+# Dins del client alpine:
+apk add curl
+curl http://servidor-web</code></pre>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🛠️ Entorn segur amb xarxa personalitzada</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Crea la xarxa</h4><pre><code>docker network create xarxa-segura</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Llança Apache amb Bind Mount al port 9090</h4><pre><code>docker run -d --name servidor-apache \
+  --network xarxa-segura \
+  -v $(pwd)/html:/usr/local/apache2/htdocs/ \
+  -p 9090:80 \
+  httpd</code></pre><p>El fitxer <code>html/index.html</code> ha de dir "Hola Sessió 4".</p></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Prova la connexió des d'Alpine</h4><pre><code>docker run -it --network xarxa-segura alpine sh
+# Dins:
+ping servidor-apache</code></pre></div></div>
+      </div>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '04-persistencia-xarxes.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

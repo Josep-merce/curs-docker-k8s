@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 · Docker Swarm | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge" style="background:rgba(244,63,142,0.15);color:#f9a8d4;border:1px solid rgba(244,63,142,0.3);">🔴 Mòdul 3 · Sessió 09</span>
+    <h1 class="page-title">Docker Swarm<br>Orquestració i Clústers</h1>
+    <p class="page-subtitle">Deixa de pensar en contenidors individuals i comença a pensar en Serveis. Forma un clúster que s'autorepara i escala automàticament.</p>
+  </div>
+  <main>
+    <div class="section-label">Arquitectura del Swarm</div>
+    <div class="card">
+      <h2>🐝 Conceptes fonamentals</h2>
+      <div class="card-grid">
+        <div class="card" style="margin:0;"><h3>🧠 Manager (El Cervell)</h3><p>Pren decisions, programa contenidors i manté l'estat del clúster.</p></div>
+        <div class="card" style="margin:0;"><h3>💪 Worker (El Múscul)</h3><p>Només executa les tasques que li mana el Manager.</p></div>
+      </div>
+      <div class="highlight-box info" style="margin-top:1rem;">
+        <div class="box-title">Diferència clau</div>
+        <p style="margin:0;">Docker normal: <code>docker run</code> (llança un contenidor). Docker Swarm: <code>docker service create</code> (defineix un estat desitjat: "vull 3 còpies sempre actives").</p>
+      </div>
+    </div>
+
+    <div class="section-label">Crear el clúster</div>
+    <div class="card">
+      <h2>🛠️ Init & Join</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Inicialitzar el Swarm</h4><pre><code>docker swarm init --advertise-addr &lt;LA_TEVA_IP_PRIVADA&gt;</code></pre><p>Docker respondrà amb una comanda <code>docker swarm join --token...</code> Copia-la!</p></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Afegir Workers (en altres màquines)</h4><pre><code># A la màquina worker, enganxa la comanda del pas 1:
+docker swarm join --token SWMTKN-xxx... IP:2377</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Verificar l'estat</h4><pre><code>docker node ls</code></pre><p>Hauries de veure el node amb estatus <strong>Leader</strong>.</p></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Gestió de Serveis</div>
+    <div class="card">
+      <h2>🚀 Comandes de serveis</h2>
+      <pre><code># Crear un servei amb 3 rèpliques
+docker service create --name la-meva-web --replicas 3 -p 80:80 nginx
+
+# Escalar (pujar a 5 rèpliques)
+docker service scale la-meva-web=5
+
+# Rolling Update (actualitzar sense parar el servei)
+docker service update --image nginx:alpine la-meva-web
+
+# Manteniment d'un node (treure'l del servei)
+docker node update --availability drain &lt;ID_DEL_NODE&gt;
+
+# Llistar serveis
+docker service ls
+
+# Veure on s'executa cada tasca
+docker service ps la-meva-web</code></pre>
+    </div>
+
+    <div class="section-label">Projecte final: WordPress en Swarm</div>
+    <div class="card">
+      <h2>🏆 Stack WordPress amb docker stack deploy</h2>
+      <pre><code>version: "3.8"
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wp_pass
+    volumes:
+      - db_data:/var/lib/mysql
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == worker
+
+  wordpress:
+    image: wordpress:latest
+    depends_on: [db]
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wp_pass
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    ports:
+      - "80:80"
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == worker
+
+volumes:
+  db_data:
+  wordpress_data:</code></pre>
+      <pre><code># Etiquetar el node
+docker node update --label-add role=worker &lt;HOSTNAME&gt;
+
+# Desplegar el stack
+docker stack deploy -c docker-compose.yml el-meu-blog
+
+# Verificar
+docker service ls
+docker stack ps el-meu-blog</code></pre>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '09-swarm.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

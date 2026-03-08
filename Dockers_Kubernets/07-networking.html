@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>07 · Networking Avançat | Curs Docker & K8s</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-docker">🟠 Mòdul 2 · Sessió 07</span>
+    <h1 class="page-title">Networking Avançat<br>i Seguretat</h1>
+    <p class="page-subtitle">Domina la comunicació entre contenidors. Tria el driver de xarxa adequat i segmenta aplicacions per seguretat (Frontend vs Backend vs DB).</p>
+  </div>
+  <main>
+    <div class="section-label">Els 4 tipus de xarxes (Drivers)</div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>🌉 Bridge — L'estàndard</h3>
+        <p>Xarxa privada interna. Perfecta per a aplicacions web estàndard (WordPress + MySQL).</p>
+        <pre><code>docker run --network bridge ...</code></pre>
+      </div>
+      <div class="card">
+        <h3>🔥 Host — Rendiment màxim</h3>
+        <p>El contenidor comparteix la IP i ports de la màquina física. Sense aïllament. Per a streaming o gaming.</p>
+        <pre><code>docker run --network host ...</code></pre>
+        <div class="highlight-box warning" style="margin-top:0.5rem;"><div class="box-title">⚠️ Perill</div><p style="margin:0; font-size:0.85rem;">Ocupa els ports de la màquina real directament.</p></div>
+      </div>
+      <div class="card">
+        <h3>🌍 Overlay — Clústers</h3>
+        <p>Connecta contenidors en <strong>servidors físics diferents</strong>. Per a Docker Swarm i Kubernetes.</p>
+        <pre><code>docker network create --driver overlay xarxa-cluster</code></pre>
+      </div>
+      <div class="card">
+        <h3>🔇 None — Aïllament total</h3>
+        <p>Només loopback. Cap connexió a l'exterior. Per a tasques de seguretat màxima.</p>
+        <pre><code>docker run --network none ...</code></pre>
+      </div>
+    </div>
+
+    <div class="section-label">Gestió manual de xarxes</div>
+    <div class="card">
+      <h2>⚙️ Control total sobre IPs</h2>
+      <pre><code># Crear xarxa amb IP fixa
+docker network create \
+  --driver bridge \
+  --subnet=192.168.11.0/24 \
+  --gateway=192.168.11.1 \
+  xarxa-personalitzada
+
+# Connectar/Desconnectar en calent
+docker network connect xarxa-personalitzada el-meu-contenidor
+docker network disconnect bridge el-meu-contenidor
+
+# Inspeccionar
+docker network inspect xarxa-personalitzada</code></pre>
+    </div>
+
+    <div class="section-label">Arquitectura segura de 3 nivells</div>
+    <div class="card">
+      <h2>🛡️ Segmentació de xarxes amb Docker Compose</h2>
+      <p>La millor pràctica de seguretat: no posis tots els contenidors a la mateixa xarxa.</p>
+      <ul style="margin-bottom:1rem;">
+        <li>El món accedeix al <strong>Frontend</strong>.</li>
+        <li>El Frontend parla amb el <strong>Backend</strong>.</li>
+        <li>El Backend parla amb la <strong>DB</strong>.</li>
+        <li>🚫 El Frontend NO pot parlar amb la DB directament.</li>
+      </ul>
+      <pre><code>version: "3.9"
+services:
+  frontend:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    networks:
+      - front-tier
+
+  backend:
+    image: node:18-alpine
+    networks:
+      - front-tier
+      - back-tier
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+    networks:
+      - back-tier
+
+networks:
+  front-tier:
+  back-tier:
+    internal: true  # Prohibeix sortida a internet</code></pre>
+    </div>
+
+    <div class="section-label">Troubleshooting de xarxes</div>
+    <div class="card">
+      <h2>🚑 Checklist de diagnòstic</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Estan a la mateixa xarxa?</h4><pre><code>docker network inspect nom-de-la-xarxa</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Resolució de noms (DNS)</h4><pre><code>docker exec -it contenidorA ping contenidorB</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Ports exposats?</h4><p>Recorda: entre contenidors NO cal exposar ports amb <code>-p</code>. El <code>-p</code> és NOMÉS per accedir des de fora.</p></div></div>
+        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Revisa els logs</h4><pre><code>docker logs contenidor-backend</code></pre></div></div>
+      </div>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '07-networking.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

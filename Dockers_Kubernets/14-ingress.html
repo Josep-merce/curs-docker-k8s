@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14 · Ingress | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-k8s">🔴 Mòdul 3 · Sessió 14</span>
+    <h1 class="page-title">Ingress<br>Enrutament Avançat</h1>
+    <p class="page-subtitle">A internet no anem teclejant IPs amb ports estranys. Amb Ingress i Traefik, accedim a les aplicacions amb dominis nets com app.local.</p>
+  </div>
+  <main>
+    <div class="section-label">Limitacions del NodePort</div>
+    <div class="card">
+      <h2>🚧 Per què necessitem Ingress?</h2>
+      <ul>
+        <li><strong>Ports poc amigables:</strong> Obliga a ports alts (30000+). Els usuaris esperen el port 80/443.</li>
+        <li><strong>Gestió caòtica:</strong> 15 microserveis = 15 ports diferents a recordar.</li>
+        <li><strong>Manca d'enrutament:</strong> NodePort no entén de dominis ni rutes (<code>/api</code>, <code>/blog</code>).</li>
+      </ul>
+    </div>
+
+    <div class="section-label">Ingress + Traefik</div>
+    <div class="card">
+      <h2>🚦 Com funciona?</h2>
+      <div class="card-grid">
+        <div class="card" style="margin:0;"><h3>📋 L'Ingress (Les regles)</h3><p>Fitxer YAML on definim les normes: "Si demanen <code>app.local</code>, envia-ho a Nginx. Si demanen <code>api.local</code>, envia-ho al backend."</p></div>
+        <div class="card" style="margin:0;"><h3>⚙️ Ingress Controller (El motor)</h3><p>El programa real (reverse proxy) que llegeix les regles i executa el trànsit. k3s ve amb <strong>Traefik</strong> preinstal·lat.</p></div>
+      </div>
+    </div>
+
+    <div class="section-label">Pràctica: El teu primer domini local</div>
+    <div class="card">
+      <h2>🛠️ Configurar app.local</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">0</span><div class="step-content"><h4>Preparar el Deployment</h4><pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: el-meu-web-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: el-meu-web
+  template:
+    metadata:
+      labels:
+        app: el-meu-web
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80</code></pre></div></div>
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Service intern (ClusterIP)</h4><p>Crea <code>nginx-clusterip.yaml</code>:</p><pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: servei-web-intern
+spec:
+  type: ClusterIP
+  selector:
+    app: el-meu-web
+  ports:
+  - port: 80
+    targetPort: 80</code></pre><pre><code>sudo kubectl apply -f nginx-clusterip.yaml</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Crear la regla d'Ingress</h4><p>Crea <code>nginx-ingress.yaml</code>:</p><pre><code>apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-web
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: app.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: servei-web-intern
+            port:
+              number: 80</code></pre><pre><code>sudo kubectl apply -f nginx-ingress.yaml</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Verificar l'Ingress</h4><pre><code>kubectl get ingress</code></pre></div></div>
+        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Editar el fitxer hosts</h4><p><strong>Linux/macOS:</strong> <code>sudo nano /etc/hosts</code><br><strong>Windows:</strong> <code>C:\Windows\System32\drivers\etc\hosts</code></p><pre><code>192.168.33.11 app.local</code></pre></div></div>
+        <div class="step"><span class="step-num">5</span><div class="step-content"><h4>La prova final</h4><p>Obre el navegador i accedeix a <code>http://app.local</code> 🎉</p></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Comparativa mètodes d'exposició</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Mètode</th><th>Com funciona?</th><th>Avantatge principal</th></tr></thead>
+        <tbody>
+          <tr><td>NodePort</td><td>Obre un port alt (ex: 30080) a la IP del node</td><td>Molt fàcil per a proves ràpides</td></tr>
+          <tr><td>LoadBalancer</td><td>Demana una IP pública al Cloud</td><td>Connecta amb internet de forma nativa</td></tr>
+          <tr><td>Ingress</td><td>Proxy (Traefik) que enruta per domini/ruta</td><td>Múltiples webs al mateix port 80/443</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🎯 Exposa botiga.local</h2>
+      <p>Crea un Deployment (<code>httpd:alpine</code>, 2 rèpliques), un Service ClusterIP i un Ingress perquè <code>botiga.local</code> apunti a la teva botiga. No oblidis editar el fitxer <code>/etc/hosts</code>!</p>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '14-ingress.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

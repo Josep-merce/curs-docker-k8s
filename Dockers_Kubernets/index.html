@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curs Docker & Kubernetes</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem 3rem;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-glow {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(36,150,237,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #00d4ff 0%, #2496ed 40%, #7c3aed 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--docker-cyan);
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .module-section { margin-bottom: 3rem; }
+    .module-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .module-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-green { background: var(--green); box-shadow: 0 0 10px var(--green); }
+    .dot-orange { background: var(--orange); box-shadow: 0 0 10px var(--orange); }
+    .dot-pink { background: var(--pink); box-shadow: 0 0 10px var(--pink); }
+    .module-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .module-meta {
+      margin-left: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .objectiu-box {
+      background: linear-gradient(135deg, rgba(36,150,237,0.1), rgba(124,58,237,0.1));
+      border: 1px solid rgba(36,150,237,0.2);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin: 0 auto 3rem;
+      max-width: 1100px;
+    }
+    .objectiu-box h2 {
+      color: var(--docker-cyan);
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <nav id="main-nav"></nav>
+
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="module-badge badge-general" style="margin: 0 auto 1.5rem;">
+      🎓 Material educatiu complet
+    </div>
+    <h1 class="hero-title">Docker &amp;<br>Kubernetes</h1>
+    <p class="hero-sub">Des de la instal·lació bàsica fins al desplegament d'aplicacions escalables en clústers Kubernetes. 30 hores · 10 sessions.</p>
+  </div>
+
+  <main style="padding-top: 0;">
+    <div class="objectiu-box">
+      <h2>🎯 Objectiu del curs</h2>
+      <p style="margin:0; color: var(--text);">Portar l'estudiant des de la instal·lació bàsica de Docker fins al desplegament d'aplicacions escalables en clústers Kubernetes, seguint les millors pràctiques de la indústria Cloud-Native.</p>
+    </div>
+
+    <!-- MÒDUL 1 -->
+    <div class="module-section">
+      <div class="module-header">
+        <span class="module-dot dot-green"></span>
+        <span class="module-title">🟢 Mòdul 1 — Fonaments de Contenidors</span>
+        <span class="module-meta">Sessions 1–4</span>
+      </div>
+      <p style="color:var(--text-muted); margin-bottom:1.25rem;">Dominar el concepte de contenidor, aprendre a utilitzar imatges existents i crear-ne de pròpies.</p>
+      <div class="card-grid">
+        <a href="01-fonaments-docker.html" class="card-link">
+          <span class="card-icon">🐳</span>
+          <span class="card-num">Sessió 01</span>
+          <span class="card-title">Fonaments de Docker</span>
+          <span class="card-desc">Creació i gestió de contenidors. Cicle de vida complet: run, ps, stop, rm.</span>
+          <div class="tags"><span class="tag">docker run</span><span class="tag">docker ps</span><span class="tag">nginx</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="02-imatges.html" class="card-link">
+          <span class="card-icon">📦</span>
+          <span class="card-num">Sessió 02</span>
+          <span class="card-title">Imatges Docker</span>
+          <span class="card-desc">Construcció i gestió d'imatges. Docker Hub, sistema de capes, Dockerfile.</span>
+          <div class="tags"><span class="tag">Dockerfile</span><span class="tag">docker build</span><span class="tag">docker pull</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="03-apps-optimitzacio.html" class="card-link">
+          <span class="card-icon">🏗️</span>
+          <span class="card-num">Sessió 03</span>
+          <span class="card-title">Apps Reals i Optimització</span>
+          <span class="card-desc">Node.js real, imatges slim vs fat, CMD vs ENTRYPOINT, anàlisi amb Dive.</span>
+          <div class="tags"><span class="tag">slim</span><span class="tag">ENTRYPOINT</span><span class="tag">Dive</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="04-persistencia-xarxes.html" class="card-link">
+          <span class="card-icon">🔒</span>
+          <span class="card-num">Sessió 04</span>
+          <span class="card-title">Persistència i Xarxes</span>
+          <span class="card-desc">docker exec, logs, volums, bind mounts i exposició de ports.</span>
+          <div class="tags"><span class="tag">docker exec</span><span class="tag">volumes</span><span class="tag">-p ports</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="05-volums.html" class="card-link">
+          <span class="card-icon">💾</span>
+          <span class="card-num">Sessió 05</span>
+          <span class="card-title">Volums</span>
+          <span class="card-desc">Persistència de dades profunda. Volumes vs Bind Mounts vs tmpfs.</span>
+          <div class="tags"><span class="tag">docker volume</span><span class="tag">bind mount</span><span class="tag">tmpfs</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- MÒDUL 2 -->
+    <div class="module-section">
+      <div class="module-header">
+        <span class="module-dot dot-orange"></span>
+        <span class="module-title">🟠 Mòdul 2 — Orquestració Local i Xarxes</span>
+        <span class="module-meta">Sessions 5–8</span>
+      </div>
+      <p style="color:var(--text-muted); margin-bottom:1.25rem;">Connectar contenidors entre ells i professionalitzar el flux de treball amb Docker Compose i xarxes avançades.</p>
+      <div class="card-grid">
+        <a href="06-docker-compose.html" class="card-link">
+          <span class="card-icon">🐙</span>
+          <span class="card-num">Sessió 06</span>
+          <span class="card-title">Docker Compose</span>
+          <span class="card-desc">Orquestració multi-contenidor. Stack complet Frontend + Backend + DB en un sol fitxer.</span>
+          <div class="tags"><span class="tag">docker-compose.yml</span><span class="tag">IaC</span><span class="tag">WordPress</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="07-networking.html" class="card-link">
+          <span class="card-icon">🌐</span>
+          <span class="card-num">Sessió 07</span>
+          <span class="card-title">Networking Avançat</span>
+          <span class="card-desc">Drivers bridge, host, overlay. Segmentació per seguretat: Frontend vs Backend.</span>
+          <div class="tags"><span class="tag">bridge</span><span class="tag">overlay</span><span class="tag">seguretat</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="08-registry.html" class="card-link">
+          <span class="card-icon">🏪</span>
+          <span class="card-num">Sessió 08</span>
+          <span class="card-title">Docker Registry</span>
+          <span class="card-desc">Gestió professional d'imatges. Docker Hub, Harbor, AWS ECR. Multi-stage builds.</span>
+          <div class="tags"><span class="tag">docker push</span><span class="tag">tagging</span><span class="tag">Harbor</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- MÒDUL 3 -->
+    <div class="module-section">
+      <div class="module-header">
+        <span class="module-dot dot-pink"></span>
+        <span class="module-title">🔴 Mòdul 3 — Orquestració a Gran Escala</span>
+        <span class="module-meta">Sessions 9–19</span>
+      </div>
+      <p style="color:var(--text-muted); margin-bottom:1.25rem;">El salt cap a la producció i els clústers de servidors. Docker Swarm i Kubernetes complet.</p>
+      <div class="card-grid">
+        <a href="09-swarm.html" class="card-link k8s-card">
+          <span class="card-icon">🐝</span>
+          <span class="card-num">Sessió 09</span>
+          <span class="card-title">Docker Swarm</span>
+          <span class="card-desc">Clúster natiu Docker. Manager vs Worker. Serveis replicats, Rolling Updates.</span>
+          <div class="tags"><span class="tag">swarm init</span><span class="tag">replicas</span><span class="tag">HA</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="10-kubernetes-pods.html" class="card-link k8s-card">
+          <span class="card-icon">☸️</span>
+          <span class="card-num">Sessió 10</span>
+          <span class="card-title">Introducció a Kubernetes</span>
+          <span class="card-desc">Arquitectura K8s, k3s, kubectl. Control Plane, Nodes, primer Pod.</span>
+          <div class="tags"><span class="tag">k3s</span><span class="tag">kubectl</span><span class="tag">minikube</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="11-que-es-pod.html" class="card-link k8s-card">
+          <span class="card-icon">🫛</span>
+          <span class="card-num">Sessió 11</span>
+          <span class="card-title">Què és un Pod?</span>
+          <span class="card-desc">La unitat mínima de Kubernetes. Via imperativa vs declarativa. YAML manifests.</span>
+          <div class="tags"><span class="tag">Pod</span><span class="tag">YAML</span><span class="tag">kubectl apply</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="12-replicasets.html" class="card-link k8s-card">
+          <span class="card-icon">🔄</span>
+          <span class="card-num">Sessió 12</span>
+          <span class="card-title">ReplicaSets i Deployments</span>
+          <span class="card-desc">Alta disponibilitat. Escalat horitzontal, Rolling Updates i Rollbacks.</span>
+          <div class="tags"><span class="tag">Deployment</span><span class="tag">ReplicaSet</span><span class="tag">scale</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="13-services.html" class="card-link k8s-card">
+          <span class="card-icon">🚦</span>
+          <span class="card-num">Sessió 13</span>
+          <span class="card-title">Services</span>
+          <span class="card-desc">Exposar aplicacions. ClusterIP, NodePort, LoadBalancer. Labels i Selectors.</span>
+          <div class="tags"><span class="tag">ClusterIP</span><span class="tag">NodePort</span><span class="tag">LoadBalancer</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="14-ingress.html" class="card-link k8s-card">
+          <span class="card-icon">🚪</span>
+          <span class="card-num">Sessió 14</span>
+          <span class="card-title">Ingress</span>
+          <span class="card-desc">Enrutament avançat per domini. Traefik com a Ingress Controller a k3s.</span>
+          <div class="tags"><span class="tag">Traefik</span><span class="tag">domini</span><span class="tag">HTTP</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="15-configmaps-secrets.html" class="card-link k8s-card">
+          <span class="card-icon">🔐</span>
+          <span class="card-num">Sessió 15</span>
+          <span class="card-title">ConfigMaps i Secrets</span>
+          <span class="card-desc">Configuració desacoblada del codi. Variables d'entorn i fitxers muntats.</span>
+          <div class="tags"><span class="tag">ConfigMap</span><span class="tag">Secret</span><span class="tag">Base64</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="16-volumes-pv-pvc.html" class="card-link k8s-card">
+          <span class="card-icon">🗄️</span>
+          <span class="card-num">Sessió 16</span>
+          <span class="card-title">Volumes, PV i PVC</span>
+          <span class="card-desc">Persistència a Kubernetes. PersistentVolume, PVC, StatefulSets.</span>
+          <div class="tags"><span class="tag">PV</span><span class="tag">PVC</span><span class="tag">StatefulSet</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="17-troubleshooting.html" class="card-link k8s-card">
+          <span class="card-icon">🔬</span>
+          <span class="card-num">Sessió 17</span>
+          <span class="card-title">Troubleshooting</span>
+          <span class="card-desc">Diagnòstic d'errors. Pending, CrashLoopBackOff, ImagePullBackOff.</span>
+          <div class="tags"><span class="tag">describe</span><span class="tag">logs</span><span class="tag">events</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+        <a href="18-projecte-final.html" class="card-link k8s-card">
+          <span class="card-icon">🏆</span>
+          <span class="card-num">Sessió 18</span>
+          <span class="card-title">Projecte Final K8s</span>
+          <span class="card-desc">Desplegament Cloud-Native complet: WordPress + MariaDB + Ingress + Secrets + PVCs.</span>
+          <div class="tags"><span class="tag">WordPress</span><span class="tag">MariaDB</span><span class="tag">producció</span></div>
+          <span class="card-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <div id="main-footer"></div>
+
+  <script>const CURRENT_PAGE = 'index.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

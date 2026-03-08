@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12 · ReplicaSets | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-k8s">🔴 Mòdul 3 · Sessió 12</span>
+    <h1 class="page-title">ReplicaSets<br>i Deployments</h1>
+    <p class="page-subtitle">Els Pods solitaris moren i no tornen. Els ReplicaSets els ressusciten. Els Deployments gestionen versions, actualitzacions i rollbacks de forma elegant.</p>
+  </div>
+  <main>
+    <div class="section-label">Jerarquia de controladors</div>
+    <div class="card">
+      <h2>📊 Resum de conceptes</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Concepte</th><th>Responsabilitat</th><th>Analogia</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Pod</strong></td><td>Executar el contenidor</td><td>El treballador individual</td></tr>
+          <tr><td><strong>ReplicaSet</strong></td><td>Mantenir N Pods vius en tot moment</td><td>L'encarregat de torn que cobreix les baixes</td></tr>
+          <tr><td><strong>Deployment</strong></td><td>Gestionar versions, actualitzacions i ReplicaSets</td><td>El director de RRHH i operacions</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="section-label">Deployment en pràctica</div>
+    <div class="card">
+      <h2>📝 Manifest wordpress-deployment.yaml</h2>
+      <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: el-meu-wordpress
+  labels:
+    app: wordpress
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      containers:
+      - name: wordpress
+        image: wordpress:6.2-apache
+        ports:
+        - containerPort: 80</code></pre>
+      <pre><code>sudo kubectl apply -f wordpress-deployment.yaml
+sudo kubectl get pods
+# Hauries de veure 3 Pods creats automàticament!</code></pre>
+      <div class="highlight-box tip">
+        <div class="box-title">💡 Prova-ho!</div>
+        <p style="margin:0;">Esborra un Pod amb <code>kubectl delete pod &lt;nom&gt;</code> i torna a fer <code>get pods</code> ràpidament. El Deployment ja n'estarà creant un de nou!</p>
+      </div>
+    </div>
+
+    <div class="section-label">Escalat</div>
+    <div class="card">
+      <h2>📈 Escalar amunt i avall</h2>
+      <pre><code># Escalar a 5 rèpliques
+sudo kubectl scale deployment el-meu-wordpress --replicas=5
+
+# Verificar
+sudo kubectl get pods
+
+# Tornar a 2
+sudo kubectl scale deployment el-meu-wordpress --replicas=2</code></pre>
+    </div>
+
+    <div class="section-label">Rolling Updates i Rollbacks</div>
+    <div class="card">
+      <h2>🔄 La superpotència dels Deployments</h2>
+      <h3>Rolling Update (actualització progressiva)</h3>
+      <p>Kubernetes crea un Pod nou, espera que estigui llest, apaga un Pod antic, i repeteix. Zero downtime!</p>
+      <pre><code># Actualitzar de v6.2 a v6.3
+sudo kubectl set image deployment/el-meu-wordpress wordpress=wordpress:6.3-apache
+
+# Veure l'estat en temps real
+sudo kubectl rollout status deployment/el-meu-wordpress</code></pre>
+
+      <h3>Rollback (desfer l'últim canvi)</h3>
+      <pre><code># La v6.3 té un error crític? No pateixis!
+sudo kubectl rollout undo deployment/el-meu-wordpress
+
+# Veure l'historial
+sudo kubectl rollout history deployment/el-meu-wordpress</code></pre>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🏋️ Gestió de Deployments</h2>
+      <p>Crea <code>tasca10.yaml</code> amb un Deployment d'Apache amb 2 rèpliques, aplica'l, escala a 5 i captura el resultat.</p>
+      <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apache-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: apache
+  template:
+    metadata:
+      labels:
+        app: apache
+    spec:
+      containers:
+      - name: apache
+        image: httpd:alpine
+        ports:
+        - containerPort: 80</code></pre>
+      <pre><code>sudo kubectl apply -f tasca10.yaml
+sudo kubectl scale deployment apache-deployment --replicas=5
+sudo kubectl get pods</code></pre>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '12-replicasets.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

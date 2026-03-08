@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>16 · Volumes PV i PVC | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-k8s">🔴 Mòdul 3 · Sessió 16</span>
+    <h1 class="page-title">Volumes, PV i PVC<br>Persistència a Kubernetes</h1>
+    <p class="page-subtitle">El sistema de fitxers d'un contenidor és efímer. Aprèn a treure les dades de dins del contenidor per garantir que sobrevisquin als reinicis i destruccions.</p>
+  </div>
+  <main>
+    <div class="section-label">Stateless vs Stateful</div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>🌊 Stateless (Sense estat)</h3>
+        <p>Nginx, Apache, microserveis de càlcul. No guarden dades locals importants. Si el Pod mor, no passa res.</p>
+      </div>
+      <div class="card">
+        <h3>💾 Stateful (Amb estat)</h3>
+        <p>MySQL, PostgreSQL, Redis. Necessiten persistència. Si el Pod mor i perdem el disc, és una catàstrofe.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Les tres capes de persistència</div>
+    <div class="card">
+      <div class="table-wrap"><table>
+        <thead><tr><th>Component</th><th>Què és?</th><th>Analogia</th></tr></thead>
+        <tbody>
+          <tr><td><strong>PersistentVolume (PV)</strong></td><td>Tros d'emmagatzematge real al clúster (disc local, AWS EBS, NFS)</td><td>El disc dur real a la prestatgeria de la botiga</td></tr>
+          <tr><td><strong>PersistentVolumeClaim (PVC)</strong></td><td>Petició d'emmagatzematge feta per un Pod ("necessito 5GB")</td><td>El tiquet de compra o reserva del client</td></tr>
+          <tr><td><strong>VolumeMount</strong></td><td>Configuració dins del Pod per usar el PVC</td><td>El cable que connecta el disc a l'ordinador</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="section-label">Pràctica: Redis immortal</div>
+    <div class="card">
+      <h2>🛠️ Base de dades persistent amb Redis</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Crear el PVC (redis-pvc.yaml)</h4><pre><code>apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-dades-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi</code></pre><pre><code>sudo kubectl apply -f redis-pvc.yaml</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Desplegar Redis (redis-pod.yaml)</h4><pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-persistent
+spec:
+  containers:
+  - name: redis
+    image: redis:alpine
+    volumeMounts:
+    - name: emmagatzematge-redis
+      mountPath: /data
+  volumes:
+  - name: emmagatzematge-redis
+    persistentVolumeClaim:
+      claimName: redis-dades-pvc</code></pre><pre><code>sudo kubectl apply -f redis-pod.yaml</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>La prova de foc</h4><pre><code># Guardar una dada
+sudo kubectl exec -it redis-persistent -- redis-cli set el_meu_nom "Goku"
+
+# Esborrar el Pod!
+sudo kubectl delete pod redis-persistent
+
+# Recrear el Pod
+sudo kubectl apply -f redis-pod.yaml
+
+# Comprovar que la dada ha sobreviscut
+sudo kubectl exec -it redis-persistent -- redis-cli get el_meu_nom
+# Ha de retornar: "Goku"</code></pre></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">StatefulSets (avançat)</div>
+    <div class="card">
+      <h2>📊 3 rèpliques amb 3 PVCs independents</h2>
+      <pre><code>apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-statefulset
+spec:
+  serviceName: "redis"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:alpine
+        volumeMounts:
+        - name: emmagatzematge-redis
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: emmagatzematge-redis
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi</code></pre>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🎯 Sobreviure al Caos — MariaDB</h2>
+      <p>Desplega MariaDB amb un PVC de 2Gi, crea una base de dades <code>prova_supervivencia</code>, esborra el Pod i demostra que la base de dades ha sobreviscut en el Pod nou.</p>
+      <pre><code># Entrar a MariaDB
+kubectl exec -it &lt;nom-pod&gt; -- mysql -u root -p
+
+# Dins de MariaDB:
+CREATE DATABASE prova_supervivencia;
+SHOW DATABASES;
+exit
+
+# Destruir i recrear el Pod...
+# Tornar a entrar i:
+SHOW DATABASES;  # prova_supervivencia ha de seguir aquí!</code></pre>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '16-volumes-pv-pvc.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

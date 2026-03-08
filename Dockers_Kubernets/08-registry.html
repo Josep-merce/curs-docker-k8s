@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>08 · Docker Registry | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-docker">🟠 Mòdul 2 · Sessió 08</span>
+    <h1 class="page-title">Docker Registry<br>Gestió Professional d'Imatges</h1>
+    <p class="page-subtitle">Comparteix el teu programari. Publica imatges a Docker Hub, monta un registre privat i crea imatges Pro: petites, segures i ràpides.</p>
+  </div>
+  <main>
+    <div class="section-label">Tipus de registres</div>
+    <div class="card">
+      <h2>🏪 Públic vs Privat vs Cloud</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tipus</th><th>Exemples</th><th>Quan usar-lo?</th></tr></thead>
+        <tbody>
+          <tr><td>Públic</td><td>Docker Hub</td><td>Projectes Open Source, aprenentatge</td></tr>
+          <tr><td>Privat (On-prem)</td><td>Harbor, Registry:2</td><td>Empreses amb servidors propis, alta seguretat</td></tr>
+          <tr><td>Cloud</td><td>AWS ECR, Azure ACR, Google AR</td><td>Si ja tens tota la infraestructura al núvol</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="section-label">Publicar a Docker Hub</div>
+    <div class="card">
+      <h2>🚀 El cicle Login → Build → Tag → Push</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Autenticació</h4><pre><code>docker login
+# Introdueix el teu usuari i contrasenya de Docker Hub</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Construcció</h4><pre><code>docker build -t la-meva-app .</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Etiquetatge (Tag)</h4><p>Format: <code>docker tag &lt;imatge_local&gt; &lt;usuari&gt;/&lt;nom_imatge&gt;:&lt;versió&gt;</code></p><pre><code>docker tag la-meva-app guillemhs/hola-mon:v1.0</code></pre></div></div>
+        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Pujada (Push)</h4><pre><code>docker push guillemhs/hola-mon:v1.0</code></pre><p>Ara qualsevol persona del món pot fer <code>docker run guillemhs/hola-mon:v1.0</code>.</p></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Bones pràctiques d'optimització</div>
+    <div class="card">
+      <h2>⚡ Els 4 Manaments de l'Optimització</h2>
+      <div class="card-grid">
+        <div class="card" style="margin:0;"><h3>1. No usaràs imatges gegants</h3><p>Evita <code>ubuntu:latest</code>. Usa <code>alpine</code> o <code>slim</code>.</p></div>
+        <div class="card" style="margin:0;"><h3>2. No executaràs com a Root</h3><p>Per seguretat, crea un usuari dins del Dockerfile.</p></div>
+        <div class="card" style="margin:0;"><h3>3. Usaràs .dockerignore</h3><p>No copiis <code>.git</code> o <code>node_modules</code>. Ocupen espai i trenquen la caché.</p></div>
+        <div class="card" style="margin:0;"><h3>4. Ordenaràs les capes</h3><p>El que menys canvia (dependències) al principi. El codi al final. Màxima caché.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Comparativa visual</h2>
+      <div class="card-grid">
+        <div class="card" style="margin:0; border-color:rgba(244,63,142,0.3);">
+          <h3>❌ Dockerfile dolent (~800MB)</h3>
+          <pre><code>FROM ubuntu:latest
+RUN apt-get update
+RUN apt-get install python3
+COPY . /app
+CMD ["python3", "/app/main.py"]</code></pre>
+        </div>
+        <div class="card" style="margin:0; border-color:rgba(16,217,138,0.3);">
+          <h3>✅ Dockerfile optimitzat (~100MB)</h3>
+          <pre><code>FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["python", "main.py"]</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Tasca pràctica</div>
+    <div class="card">
+      <h2>🏋️ El Repte de l'Optimització</h2>
+      <p>Un desenvolupador júnior t'ha passat un Dockerfile "desastre" que ocupa 900MB. Optimitza'l:</p>
+      <pre><code># Original (dolent)
+FROM ubuntu:22.04
+RUN apt-get update
+RUN apt-get install -y python3 python3-pip
+COPY . /app
+WORKDIR /app
+RUN pip3 install flask
+CMD ["python3", "app.py"]</code></pre>
+      <p><strong>Entrega:</strong> El nou Dockerfile optimitzat + captura de <code>docker images</code> mostrant la diferència de mida.</p>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '08-registry.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

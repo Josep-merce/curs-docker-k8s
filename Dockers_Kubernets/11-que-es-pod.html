@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11 · Què és un Pod? | Curs Docker & K8s</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-k8s">🔴 Mòdul 3 · Sessió 11</span>
+    <h1 class="page-title">Què és un Pod?</h1>
+    <p class="page-subtitle">La unitat mínima de treball a Kubernetes. Via imperativa vs declarativa. Cicle de vida i operativa diària.</p>
+  </div>
+  <main>
+    <div class="section-label">Contenidor vs Pod</div>
+    <div class="card">
+      <h2>🫛 L'analogia de la beina de pèsols</h2>
+      <p>Kubernetes mai executa contenidors directament. Sempre els envolta en un <strong>Pod</strong>.</p>
+      <div class="card-grid">
+        <div class="card" style="margin:0;"><h3>Cas habitual</h3><p>Una beida amb un sol pèsol: un Pod amb un sol contenidor (ex: un servidor web).</p></div>
+        <div class="card" style="margin:0;"><h3>Casos avançats</h3><p>Una beida amb diversos pèsols: un Pod amb un contenidor principal i un "sidecar" que comparteixen la mateixa IP i disc.</p></div>
+      </div>
+      <div class="highlight-box info" style="margin-top:1rem;">
+        <div class="box-title">Regla d'or</div>
+        <p style="margin:0;">Quan escales, no dius "crea més contenidors", sinó <strong>"crea més Pods"</strong>. El Pod és la unitat mínima.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Via imperativa vs declarativa</div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>⚡ Via Imperativa (ràpida)</h3>
+        <p>Ordre directa. Útil per a proves ràpides.</p>
+        <pre><code>sudo kubectl run el-meu-nginx --image=nginx
+sudo kubectl get pods</code></pre>
+      </div>
+      <div class="card">
+        <h3>📝 Via Declarativa (recomanada)</h3>
+        <p>Fitxer YAML que declara l'estat desitjat. Per a producció real.</p>
+        <pre><code>sudo kubectl apply -f nginx-pod.yaml
+sudo kubectl get pods</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📄 El nostre primer YAML — nginx-pod.yaml</h2>
+      <pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-declaratiu
+  labels:
+    app: web
+spec:
+  containers:
+  - name: servidor-web
+    image: nginx:latest
+    ports:
+    - containerPort: 80</code></pre>
+      <pre><code>sudo kubectl apply -f nginx-pod.yaml</code></pre>
+    </div>
+
+    <div class="section-label">Operativa diària</div>
+    <div class="card">
+      <h2>🔄 Les 3 comandes més usades</h2>
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Llegir els Logs</h4><pre><code>sudo kubectl logs nginx-declaratiu
+# Seguir en temps real:
+sudo kubectl logs -f nginx-declaratiu</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Entrar dins del contenidor</h4><pre><code>sudo kubectl exec -it nginx-declaratiu -- /bin/sh
+# Un cop a dins:
+ls
+cat /etc/os-release
+exit</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Esborrar</h4><pre><code>sudo kubectl delete pod el-meu-nginx
+sudo kubectl delete -f nginx-pod.yaml</code></pre></div></div>
+      </div>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '11-que-es-pod.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>

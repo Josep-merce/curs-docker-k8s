@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>06 · Docker Compose | Curs Docker & K8s</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="main-nav"></nav>
+  <div class="page-header">
+    <span class="module-badge badge-docker">🟠 Mòdul 2 · Sessió 06</span>
+    <h1 class="page-title">Docker Compose<br>Orquestració de Contenidors</h1>
+    <p class="page-subtitle">Defineix i executa aplicacions multi-contenidor amb un sol fitxer YAML. Infraestructura com a codi: un sol comandament per aixecar tot l'entorn.</p>
+  </div>
+  <main>
+    <div class="section-label">Conceptes clau</div>
+    <div class="card">
+      <h2>🐙 Què és Docker Compose?</h2>
+      <p>Fins ara hem fet servir <code>docker run</code> per a cada servei. Docker Compose ens permet definir tota la infraestructura en un sol fitxer <code>docker-compose.yml</code>.</p>
+      <div class="card-grid">
+        <div class="card" style="margin:0;"><h3>📄 Tot en un fitxer</h3><p>Infraestructura com a codi (IaC). Tot el stack en un YAML versionable.</p></div>
+        <div class="card" style="margin:0;"><h3>🚀 Un sol comandament</h3><p><code>docker-compose up</code> aixeca tot l'entorn complet.</p></div>
+        <div class="card" style="margin:0;"><h3>🔗 Xarxes automàtiques</h3><p>Els serveis es veuen entre ells pel seu nom (DNS intern automàtic).</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⌨️ Comandes essencials</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Comanda</th><th>Acció</th></tr></thead>
+          <tbody>
+            <tr><td><code>docker-compose up</code></td><td>Crea i arrenca tots els serveis (afegeix <code>-d</code> per segon pla)</td></tr>
+            <tr><td><code>docker-compose down</code></td><td>Atura i esborra contenidors i xarxes</td></tr>
+            <tr><td><code>docker-compose ps</code></td><td>Llista l'estat dels serveis de l'aplicació actual</td></tr>
+            <tr><td><code>docker-compose logs -f</code></td><td>Mostra els logs de tots els serveis unificats</td></tr>
+            <tr><td><code>docker-compose build</code></td><td>Reconstrueix les imatges</td></tr>
+            <tr><td><code>docker-compose exec servei bash</code></td><td>Entra dins d'un servei</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-label">Projecte final: Stack WordPress</div>
+    <div class="card">
+      <h2>🏆 WordPress complet amb Docker Compose</h2>
+      <pre><code>version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppassword
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wp-network
+
+  wordpress:
+    image: wordpress:latest
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppassword
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - wp-network
+
+volumes:
+  db_data:
+  wordpress_data:
+
+networks:
+  wp-network:</code></pre>
+
+      <div class="steps">
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Aixecar l'entorn</h4><pre><code>docker-compose up -d</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Accedir al navegador</h4><p>Obre <code>http://localhost:80</code> i completa la instal·lació.</p></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Prova de foc: persistència</h4><pre><code>docker-compose down
+docker-compose up -d
+# La instal·lació s'ha de mantenir!</code></pre></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Escalabilitat i ordre d'arrencada</div>
+    <div class="card">
+      <h2>⚠️ El problema de l'ordre d'arrencada</h2>
+      <p>Un problema comú: l'app intenta connectar-se a la base de dades abans que estigui llesta. Solució: usa <code>depends_on</code> i eines com <strong>wait-for-it</strong> per a esperes reals.</p>
+
+      <h2>📈 Escalabilitat amb rèpliques</h2>
+      <pre><code># Crear 3 contenidors del servei "web"
+docker-compose up -d --scale web=3</code></pre>
+      <div class="highlight-box warning">
+        <div class="box-title">⚠️ El problema dels ports</div>
+        <p style="margin:0;">Si tens <code>ports: "8080:80"</code> al YAML, fallarà perquè només un contenidor pot ocupar el port 8080. Per escalar correctament necessites un load balancer (Nginx) davant.</p>
+      </div>
+    </div>
+  </main>
+  <div id="main-footer"></div>
+  <script>const CURRENT_PAGE = '06-docker-compose.html';</script>
+  <script src="nav.js"></script>
+</body>
+</html>
