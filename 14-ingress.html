@@ -62,7 +62,7 @@ spec:
     app: el-meu-web
   ports:
   - port: 80
-    targetPort: 80</code></pre><pre><code>sudo kubectl apply -f nginx-clusterip.yaml</code></pre></div></div>
+    targetPort: 80</code></pre><pre><code>kubectl apply -f nginx-clusterip.yaml</code></pre></div></div>
         <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Crear la regla d'Ingress</h4><p>Crea <code>nginx-ingress.yaml</code>:</p><pre><code>apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -81,9 +81,10 @@ spec:
           service:
             name: servei-web-intern
             port:
-              number: 80</code></pre><pre><code>sudo kubectl apply -f nginx-ingress.yaml</code></pre></div></div>
+              number: 80</code></pre><pre><code>kubectl apply -f nginx-ingress.yaml</code></pre></div></div>
         <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Verificar l'Ingress</h4><pre><code>kubectl get ingress</code></pre></div></div>
-        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Editar el fitxer hosts</h4><p><strong>Linux/macOS:</strong> <code>sudo nano /etc/hosts</code><br><strong>Windows:</strong> <code>C:\Windows\System32\drivers\etc\hosts</code></p><pre><code>192.168.33.11 app.local</code></pre></div></div>
+        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Obtenir la IP del node</h4><pre><code>kubectl get nodes -o wide
+# Copia la columna INTERNAL-IP</code></pre><h4>Editar el fitxer hosts</h4><p><strong>Linux/macOS:</strong> <code>sudo nano /etc/hosts</code><br><strong>Windows:</strong> <code>C:\Windows\System32\drivers\etc\hosts</code></p><pre><code>&lt;INTERNAL-IP&gt; app.local</code></pre></div></div>
         <div class="step"><span class="step-num">5</span><div class="step-content"><h4>La prova final</h4><p>Obre el navegador i accedeix a <code>http://app.local</code> 🎉</p></div></div>
       </div>
     </div>

@@ -51,7 +51,7 @@
     <div class="card">
       <h2>🛠️ NodePort per accedir des del navegador</h2>
       <div class="steps">
-        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Crear el Deployment</h4><pre><code>sudo kubectl create deployment el-meu-web --image=nginx</code></pre></div></div>
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Crear el Deployment</h4><pre><code>kubectl create deployment el-meu-web --image=nginx</code></pre></div></div>
         <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Crear nginx-service.yaml</h4><pre><code>apiVersion: v1
 kind: Service
 metadata:
@@ -64,9 +64,10 @@ spec:
   - port: 80
     targetPort: 80
     nodePort: 30080</code></pre></div></div>
-        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Aplicar i comprovar</h4><pre><code>sudo kubectl apply -f nginx-service.yaml
-sudo kubectl get services</code></pre></div></div>
-        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Accedir des del navegador</h4><p>Obre: <code>http://192.168.33.10:30080</code></p><p>Si veus "Welcome to nginx!" — ho has aconseguit!</p></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Aplicar i comprovar</h4><pre><code>kubectl apply -f nginx-service.yaml
+kubectl get services</code></pre></div></div>
+        <div class="step"><span class="step-num">4</span><div class="step-content"><h4>Obtenir la IP del node i accedir</h4><pre><code>kubectl get nodes -o wide
+# Copia la columna INTERNAL-IP</code></pre><p>Obre al navegador: <code>http://&lt;INTERNAL-IP&gt;:30080</code></p><p>Si veus "Welcome to nginx!" — ho has aconseguit!</p></div></div>
       </div>
     </div>
 
