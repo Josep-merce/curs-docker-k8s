@@ -43,15 +43,26 @@
       </div>
     </div>
 
-    <div class="section-label">Posada en marxa amb Vagrant + k3s</div>
+    <div class="section-label">Instal·lació de k3s</div>
     <div class="card">
-      <h2>💻 Arrencar el clúster</h2>
+      <h2>💻 Instal·lar k3s directament</h2>
       <div class="steps">
-        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Clonar el repositori</h4><pre><code>git clone https://git.agile611.com/Agile611/startusingkubernetes.git
-cd startusingkubernetes</code></pre></div></div>
-        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Aixecar la infraestructura</h4><pre><code>vagrant up
-# Pot trigar uns minuts la primera vegada. Paciència!</code></pre></div></div>
-        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Accedir a la màquina principal</h4><pre><code>vagrant ssh server</code></pre></div></div>
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Instal·lar k3s (una sola comanda)</h4><pre><code>curl -sfL https://get.k3s.io | sh -</code></pre><p>Espera 1-2 minuts. k3s instal·la i arrenca automàticament com a servei del sistema.</p></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Configurar permisos de kubectl</h4><p>Per no haver d'usar <code>sudo</code> cada vegada:</p><pre><code>mkdir -p ~/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+sudo chown $(id -u):$(id -g) ~/.kube/config
+export KUBECONFIG=~/.kube/config</code></pre><p>Per fer-ho permanent, afegeix l'última línia al teu <code>~/.bashrc</code> o <code>~/.zshrc</code>:</p><pre><code>echo 'export KUBECONFIG=~/.kube/config' >> ~/.bashrc
+source ~/.bashrc</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Verificar que funciona</h4><pre><code>kubectl get nodes
+# Ha de mostrar el node amb estat Ready</code></pre></div></div>
+      </div>
+
+      <div class="highlight-box info">
+        <div class="box-title">ℹ️ Gestió del servei k3s</div>
+        <p style="margin:0;">k3s s'executa com a servei del sistema. Pots gestionar-lo amb:<br>
+        <code>sudo systemctl status k3s</code> — veure l'estat<br>
+        <code>sudo systemctl stop k3s</code> — aturar<br>
+        <code>sudo systemctl start k3s</code> — arrencar</p>
       </div>
     </div>
 
@@ -59,16 +70,16 @@ cd startusingkubernetes</code></pre></div></div>
     <div class="card">
       <h2>🎮 Primeres comandes</h2>
       <pre><code># Comprovar els nodes del clúster
-sudo kubectl get nodes
+kubectl get nodes
 
 # Informació del clúster
-sudo kubectl cluster-info
+kubectl cluster-info
 
 # Llistar tots els Pods
-sudo kubectl get pods
+kubectl get pods
 
 # Llistar tots els Pods de tots els namespaces
-sudo kubectl get pods -A</code></pre>
+kubectl get pods -A</code></pre>
     </div>
 
     <div class="section-label">Tasca pràctica</div>
@@ -85,8 +96,8 @@ spec:
     image: httpd:alpine
     ports:
     - containerPort: 80</code></pre>
-      <pre><code>sudo kubectl apply -f activitat9.yaml
-sudo kubectl get pods</code></pre>
+      <pre><code>kubectl apply -f activitat9.yaml
+kubectl get pods</code></pre>
     </div>
   </main>
   <div id="main-footer"></div>

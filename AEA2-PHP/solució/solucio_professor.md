@@ -35,7 +35,7 @@ Sessions · Autenticació · Control d\'accés
 
   5        admin.php         foreach (\$node              foreach (\$nodes            **0,5**
 
-  6        admin.php         \$node\[\"name\"\]           \$node\[\"nom\"\]           **0,5**
+  6        admin.php         Falta de tancamaent en la fila 33 \[\"?>"\]                     **0,5**
 
   7        meva_pagina.php   require_once \"base.php\"    require_once \"bbdd.php\"   **0,5**
 

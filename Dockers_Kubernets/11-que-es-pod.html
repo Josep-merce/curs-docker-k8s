@@ -29,14 +29,14 @@
       <div class="card">
         <h3>⚡ Via Imperativa (ràpida)</h3>
         <p>Ordre directa. Útil per a proves ràpides.</p>
-        <pre><code>sudo kubectl run el-meu-nginx --image=nginx
-sudo kubectl get pods</code></pre>
+        <pre><code>kubectl run el-meu-nginx --image=nginx
+kubectl get pods</code></pre>
       </div>
       <div class="card">
         <h3>📝 Via Declarativa (recomanada)</h3>
         <p>Fitxer YAML que declara l'estat desitjat. Per a producció real.</p>
-        <pre><code>sudo kubectl apply -f nginx-pod.yaml
-sudo kubectl get pods</code></pre>
+        <pre><code>kubectl apply -f nginx-pod.yaml
+kubectl get pods</code></pre>
       </div>
     </div>
 
@@ -54,23 +54,23 @@ spec:
     image: nginx:latest
     ports:
     - containerPort: 80</code></pre>
-      <pre><code>sudo kubectl apply -f nginx-pod.yaml</code></pre>
+      <pre><code>kubectl apply -f nginx-pod.yaml</code></pre>
     </div>
 
     <div class="section-label">Operativa diària</div>
     <div class="card">
       <h2>🔄 Les 3 comandes més usades</h2>
       <div class="steps">
-        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Llegir els Logs</h4><pre><code>sudo kubectl logs nginx-declaratiu
+        <div class="step"><span class="step-num">1</span><div class="step-content"><h4>Llegir els Logs</h4><pre><code>kubectl logs nginx-declaratiu
 # Seguir en temps real:
-sudo kubectl logs -f nginx-declaratiu</code></pre></div></div>
-        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Entrar dins del contenidor</h4><pre><code>sudo kubectl exec -it nginx-declaratiu -- /bin/sh
+kubectl logs -f nginx-declaratiu</code></pre></div></div>
+        <div class="step"><span class="step-num">2</span><div class="step-content"><h4>Entrar dins del contenidor</h4><pre><code>kubectl exec -it nginx-declaratiu -- /bin/sh
 # Un cop a dins:
 ls
 cat /etc/os-release
 exit</code></pre></div></div>
-        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Esborrar</h4><pre><code>sudo kubectl delete pod el-meu-nginx
-sudo kubectl delete -f nginx-pod.yaml</code></pre></div></div>
+        <div class="step"><span class="step-num">3</span><div class="step-content"><h4>Esborrar</h4><pre><code>kubectl delete pod el-meu-nginx
+kubectl delete -f nginx-pod.yaml</code></pre></div></div>
       </div>
     </div>
   </main>
